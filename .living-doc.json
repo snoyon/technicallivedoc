@@ -1,0 +1,125 @@
+{
+  "filenamePattern": "YYYY_MM_DD_HH_mm_[Category]_title",
+  "title": "Living Documentation",
+  "theme": "system",
+  "siteTheme": "base",
+  "hiddenHeaderMenus": [],
+  "favorites": [],
+  "language": "fr",
+  "port": 4321,
+  "extraFiles": [],
+  "showDiagramDebug": false,
+  "diagramNodePalette": [
+    "#ffffff",
+    "#f5f5f4",
+    "#f1f5f9",
+    "#dbeafe",
+    "#e0f2fe",
+    "#cffafe",
+    "#ccfbf1",
+    "#dcfce7",
+    "#ecfccb",
+    "#fef9c3",
+    "#ffedd5",
+    "#fee2e2",
+    "#ffe4e6",
+    "#fce7f3",
+    "#ede9fe"
+  ],
+  "diagramEdgePalette": [
+    "#ffffff",
+    "#a8a29e",
+    "#374151",
+    "#3b82f6",
+    "#14b8a6",
+    "#22c55e",
+    "#f97316",
+    "#ef4444",
+    "#a855f7"
+  ],
+  "sourceRoot": "..",
+  "blockedFileExtensions": [
+    "exe",
+    "sh",
+    "bat",
+    "cmd",
+    "com",
+    "scr",
+    "ps1",
+    "msi"
+  ],
+  "exclusiveFolderExpansion": false,
+  "exclusiveCategoryExpansion": false,
+  "sidebarSort": "oldest",
+  "codeBlockMaxHeight": 400,
+  "markdownSoftBreaks": true,
+  "imageRoundedCorners": true,
+  "imageCentered": true,
+  "imageBorder": true,
+  "codeBlockLightTheme": false,
+  "diagramDefaults": {
+    "arrows": {
+      "arrowDir": "to",
+      "dashes": false,
+      "fontSize": 16
+    },
+    "shapes": {
+      "box": {
+        "width": 146,
+        "height": 52,
+        "fontSize": 16,
+        "colorKey": "c-lime"
+      },
+      "ellipse": {
+        "width": 118,
+        "height": 67,
+        "fontSize": 16,
+        "colorKey": "c-red"
+      },
+      "circle": {
+        "width": 90,
+        "height": 81,
+        "fontSize": 16,
+        "colorKey": "c-amber"
+      },
+      "database": {
+        "width": 121,
+        "height": 106,
+        "fontSize": 16,
+        "colorKey": "c-cyan"
+      },
+      "actor": {
+        "width": 30,
+        "height": 52,
+        "fontSize": 16,
+        "colorKey": "c-gray"
+      },
+      "post-it": {
+        "width": 120,
+        "height": 100,
+        "fontSize": 13,
+        "colorKey": "c-orange"
+      },
+      "text-free": {
+        "width": 123,
+        "height": 44,
+        "fontSize": 16,
+        "colorKey": "c-gray"
+      }
+    }
+  },
+  "llmModelsNoV1Hosts": [
+    "https://api.deepseek.com"
+  ],
+  "debugAgents": false,
+  "gitIntegration": {
+    "mode": "disabled",
+    "pushMode": "never",
+    "pushEveryCommits": 1,
+    "commitMessage": "docs: update living documentation"
+  },
+  "okfMigration": {
+    "version": "0.1",
+    "migratedAt": "2026-09-24T04:29:52.697Z"
+  }
+}

@@ -1,0 +1,75 @@
+---
+type: Document
+title: Chapitre 3
+---
+
+<div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.6;"><span style="color: #1e40af; font-weight: bold; font-size: 1.4rem;">Chapitre 3 — Managing Users (Spring Security in Action)</span><div style="margin-top: 0.5rem; color: #4b5563; font-style: italic;">Comment décrire, authentifier et gérer les utilisateurs avec Spring Security</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">1. Vue d'ensemble du chapitre</span></div><div style="margin-top: 0.5rem;">Le chapitre détaille la partie "gestion des utilisateurs" du flux d'authentification de Spring Security, déjà esquissée au chapitre 2. Trois contrats sont au cœur du sujet :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">• <span style="color: #1d4ed8; font-family: monospace;">UserDetails</span> — décrit un utilisateur tel que le framework le comprend</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">GrantedAuthority</span> — décrit une action que l'utilisateur peut effectuer</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">UserDetailsManager</span> — étend <span style="color: #1d4ed8; font-family: monospace;">UserDetailsService</span> avec des opérations de création/modification/suppression</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">2. Le flux d'authentification</span></div><div style="margin-top: 0.5rem;">L'<span style="color: #1d4ed8; font-family: monospace;">AuthenticationFilter</span> capte la requête entrante et délègue à l'<span style="color: #1d4ed8; font-family: monospace;">AuthenticationManager</span>, qui s'appuie sur un <span style="color: #1d4ed8; font-family: monospace;">AuthenticationProvider</span>. Ce dernier vérifie le couple username/password en s'appuyant sur deux composants : le <span style="color: #1d4ed8; font-family: monospace;">UserDetailsService</span> et le <span style="color: #1d4ed8; font-family: monospace;">PasswordEncoder</span> (détaillé au chapitre 4).</div><div style="margin-top: 0.5rem; border-left: 3px solid #1e40af; background-color: #dbeafe; color: #1e3a5f; padding: 0.75rem 1rem; border-radius: 0 4px 4px 0;">Note — La séparation entre <span style="color: #1d4ed8; font-family: monospace;">UserDetailsService</span> (lecture seule) et <span style="color: #1d4ed8; font-family: monospace;">UserDetailsManager</span> (CRUD) illustre le principe de ségrégation des interfaces (ISP) : une appli qui ne fait qu'authentifier n'a besoin que du premier contrat.</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">3. Le contrat UserDetails</span></div><div style="margin-top: 0.5rem;">L'interface définit 7 méthodes :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">• <span style="color: #1d4ed8; font-family: monospace;">getUsername()</span> / <span style="color: #1d4ed8; font-family: monospace;">getPassword()</span> — utilisées pour l'authentification</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">getAuthorities()</span> — renvoie les privilèges de l'utilisateur (autorisation)</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">isAccountNonExpired()</span>, <span style="color: #1d4ed8; font-family: monospace;">isAccountNonLocked()</span>, <span style="color: #1d4ed8; font-family: monospace;">isCredentialsNonExpired()</span>, <span style="color: #1d4ed8; font-family: monospace;">isEnabled()</span> — gèrent l'activation du compte (autorisation aussi)</div><div style="margin-top: 0.5rem;">Si l'application n'a pas besoin de ces restrictions (expiration, verrouillage), ces quatre méthodes peuvent simplement renvoyer <span style="color: #1d4ed8; font-family: monospace;">true</span>. Le choix du nom (double négation, "isAccountNonExpired") vise à ce que <span style="color: #1d4ed8; font-family: monospace;">false</span> signifie toujours un échec d'autorisation.</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">4. Le contrat GrantedAuthority</span></div><div style="margin-top: 0.5rem;">Interface à une seule méthode abstraite :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">
+
+```java
+public interface GrantedAuthority extends Serializable {
+    String getAuthority();
+}
+```
+
+</div><div style="margin-top: 0.5rem;">Deux façons courantes de l'implémenter :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">
+
+```java
+GrantedAuthority g1 = () -> "READ";
+GrantedAuthority g2 = new SimpleGrantedAuthority("READ");
+```
+
+
+<!-- image-align: left -->
+![image](/images/spring_boot_authority.png)
+
+</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">5. Implémenter UserDetails</span></div><div style="margin-top: 0.5rem;">Le livre progresse en trois étapes :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">• <span style="color: #1d4ed8; font-family: monospace;">DummyUser</span> — implémentation minimale, valeurs statiques (toujours le même utilisateur "bill")</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">SimpleUser</span> — username/password en attributs, pour représenter des utilisateurs différents</div><div style="margin-left: 1rem;">• Le builder <span style="color: #1d4ed8; font-family: monospace;">User</span> (package <span style="color: #1d4ed8; font-family: monospace;">org.springframework.security.core.userdetails</span>) — évite d'écrire une classe custom</div><div style="margin-top: 0.5rem;">Exemple avec le builder :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">
+
+```java
+UserDetails u = User.withUsername("bill")
+                .password("12345")
+                .authorities("read", "write")
+                .accountExpired(false)
+                .disabled(true)
+                .build();
+```
+
+</div><div style="margin-top: 0.5rem; border-left: 3px solid #1e40af; background-color: #dbeafe; color: #1e3a5f; padding: 0.75rem 1rem; border-radius: 0 4px 4px 0;">Note — Le builder accepte aussi un <span style="color: #1d4ed8; font-family: monospace;">passwordEncoder</span> sous forme de simple <span style="color: #1d4ed8; font-family: monospace;">Function&lt;String, String&gt;</span>, distinct de l'interface <span style="color: #1d4ed8; font-family: monospace;">PasswordEncoder</span> de Spring Security.</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">6. Séparer les responsabilités (entité JPA vs UserDetails)</span></div><div style="margin-top: 0.5rem;">Problème typique : faire porter à une même classe <span style="color: #1d4ed8; font-family: monospace;">@Entity</span> à la fois la persistance JPA et le contrat <span style="color: #1d4ed8; font-family: monospace;">UserDetails</span> mène à du code confus (méthodes dupliquées, ambiguïté entre <span style="color: #1d4ed8; font-family: monospace;">getAuthority()</span> et <span style="color: #1d4ed8; font-family: monospace;">getAuthorities()</span>).</div><div style="margin-top: 0.5rem;">Solution recommandée : garder l'entité <span style="color: #1d4ed8; font-family: monospace;">User</span> uniquement JPA, et créer une classe adaptatrice <span style="color: #1d4ed8; font-family: monospace;">SecurityUser</span> qui implémente <span style="color: #1d4ed8; font-family: monospace;">UserDetails</span> en encapsulant (composition, champ <span style="color: #1d4ed8; font-family: monospace;">final</span>) l'entité <span style="color: #1d4ed8; font-family: monospace;">User</span>. Principe général : éviter de mélanger les responsabilités pour garder le code découplé et maintenable.</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">7. Le contrat UserDetailsService</span></div><div style="margin-top: 0.5rem;">Une seule méthode :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">
+
+```java
+public interface UserDetailsService {
+
+  UserDetails loadUserByUsername(String username)
+      throws UsernameNotFoundException;
+}
+```
+<!-- image-align: left -->
+![image](/images/spring_security_users_details_sevice.png)
+
+</div><div style="margin-top: 0.5rem;">Appelée par l'<span style="color: #1d4ed8; font-family: monospace;">AuthenticationProvider</span> pour récupérer un utilisateur par son nom. Si l'utilisateur n'existe pas, une <span style="color: #1d4ed8; font-family: monospace;">UsernameNotFoundException</span> est levée (c'est une <span style="color: #1d4ed8; font-family: monospace;">RuntimeException</span>, héritant de <span style="color: #1d4ed8; font-family: monospace;">AuthenticationException</span> — le <span style="color: #1d4ed8; font-family: monospace;">throws</span> dans l'interface n'est que documentaire).</div><div style="margin-top: 0.5rem;">Exemple d'implémentation in-memory (<span style="color: #1d4ed8; font-family: monospace;">InMemoryUserDetailsService</span>) : recherche dans une <span style="color: #1d4ed8; font-family: monospace;">List&lt;UserDetails&gt;</span> via un stream avec <span style="color: #1d4ed8; font-family: monospace;">filter</span> + <span style="color: #1d4ed8; font-family: monospace;">findFirst</span> + <span style="color: #1d4ed8; font-family: monospace;">orElseThrow</span>.</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">8. Le contrat UserDetailsManager</span></div><div style="margin-top: 0.5rem;">Étend <span style="color: #1d4ed8; font-family: monospace;">UserDetailsService</span> et ajoute :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">
+
+```java
+public interface UserDetailsManager extends UserDetailsService {
+  void createUser(UserDetails user);
+  void updateUser(UserDetails user);
+  void deleteUser(String username);
+  void changePassword(String oldPassword, String newPassword);
+  boolean userExists(String username);
+}
+```
+
+</div><div style="margin-top: 0.5rem;">Trois implémentations fournies par Spring Security sont présentées :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">• <span style="color: #1d4ed8; font-family: monospace;">InMemoryUserDetailsManager</span> — déjà vu au chapitre 2</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">JdbcUserDetailsManager</span> — gestion via JDBC direct sur une base SQL</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">LdapUserDetailsManager</span> — gestion via un annuaire LDAP</div><div style="margin-top: 1.5rem;">
+
+<!-- image-align: left -->
+![image](/images/springe_sec_authent_flow_17819855.png)
+
+<span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">9. JdbcUserDetailsManager en pratique</span></div><div style="margin-top: 0.5rem;">Convention par défaut : deux tables, <span style="color: #1d4ed8; font-family: monospace;">users</span> (colonnes <span style="color: #1d4ed8; font-family: monospace;">username</span>, <span style="color: #1d4ed8; font-family: monospace;">password</span>, <span style="color: #1d4ed8; font-family: monospace;">enabled</span>) et <span style="color: #1d4ed8; font-family: monospace;">authorities</span> (colonnes <span style="color: #1d4ed8; font-family: monospace;">username</span>, <span style="color: #1d4ed8; font-family: monospace;">authority</span>). Spring Boot peut exécuter automatiquement <span style="color: #1d4ed8; font-family: monospace;">schema.sql</span> et <span style="color: #1d4ed8; font-family: monospace;">data.sql</span> au démarrage.</div><div style="margin-top: 0.5rem;">Déclaration du bean :</div><div style="margin-left: 1rem; margin-top: 0.5rem;">
+
+```java
+@Bean
+public UserDetailsService userDetailsService(DataSource dataSource) {
+  return new JdbcUserDetailsManager(dataSource);
+}
+```
+
+</div><div style="margin-top: 0.5rem;">Les noms de tables/colonnes par défaut peuvent être surchargés via <span style="color: #1d4ed8; font-family: monospace;">setUsersByUsernameQuery(...)</span> et <span style="color: #1d4ed8; font-family: monospace;">setAuthoritiesByUsernameQuery(...)</span> si le schéma diffère.</div><div style="margin-top: 0.5rem; border-left: 3px solid #b45309; background-color: #fef3c7; color: #7c2d12; padding: 0.75rem 1rem; border-radius: 0 4px 4px 0;">Avertissement — Le chapitre utilise <span style="color: #1d4ed8; font-family: monospace;">NoOpPasswordEncoder</span> pour garder les exemples simples (mots de passe en clair). C'est uniquement pédagogique : à proscrire en production, le <span style="color: #1d4ed8; font-family: monospace;">PasswordEncoder</span> approprié est traité au chapitre 4.</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">10. LdapUserDetailsManager en pratique</span></div><div style="margin-top: 0.5rem;">Démonstration avec un serveur LDAP embarqué (dépendances <span style="color: #1d4ed8; font-family: monospace;">spring-security-ldap</span> + <span style="color: #1d4ed8; font-family: monospace;">unboundid-ldapsdk</span>), configuré via un fichier LDIF et les propriétés <span style="color: #1d4ed8; font-family: monospace;">spring.ldap.embedded.*</span>.</div><div style="margin-top: 0.5rem;">Le bean nécessite un <span style="color: #1d4ed8; font-family: monospace;">DefaultSpringSecurityContextSource</span> (adresse du serveur), un <span style="color: #1d4ed8; font-family: monospace;">DefaultLdapUsernameToDnMapper</span> (pour mapper le username au DN) et une base de recherche de groupe (<span style="color: #1d4ed8; font-family: monospace;">setGroupSearchBase</span>).</div><div style="margin-top: 1.5rem;"><span style="color: #1e40af; font-weight: bold; font-size: 1.1rem;">11. Points clés à retenir</span></div><div style="margin-left: 1rem; margin-top: 0.5rem;">• <span style="color: #1d4ed8; font-family: monospace;">UserDetails</span> = contrat de description de l'utilisateur</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">UserDetailsService</span> = contrat de récupération de l'utilisateur (authentification)</div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">UserDetailsManager</span> = <span style="color: #1d4ed8; font-family: monospace;">UserDetailsService</span> + CRUD utilisateur</div><div style="margin-left: 1rem;">• Implémentations fournies : <span style="color: #1d4ed8; font-family: monospace;">InMemoryUserDetailsManager</span>, <span style="color: #1d4ed8; font-family: monospace;">JdbcUserDetailsManager</span>, <span style="color: #1d4ed8; font-family: monospace;">LdapUserDetailsManager</span></div><div style="margin-left: 1rem;">• <span style="color: #1d4ed8; font-family: monospace;">JdbcUserDetailsManager</span> : avantage de ne dépendre que de JDBC, sans verrouillage vers un autre framework de persistance</div></div>
+
